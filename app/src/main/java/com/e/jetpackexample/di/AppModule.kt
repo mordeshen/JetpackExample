@@ -46,11 +46,11 @@ class AppModule{
 
     @Singleton
     @Provides
-    fun provideRetrofitBuilder(gsonBuilder:  Gson): Retrofit.Builder{
+    fun provideRetrofitBuilder(gson:  Gson): Retrofit.Builder{
         return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addCallAdapterFactory(LiveDataCallAdapterFactory())
-            .addConverterFactory(GsonConverterFactory.create(gsonBuilder))
+            .addConverterFactory(GsonConverterFactory.create(gson))
     }
 
     @Singleton

@@ -11,22 +11,10 @@ import retrofit2.Retrofit
 
 @Module
 class AuthModule{
-    //Temp
-    fun provideFakeApiService():OpenApiAuthService{
-        return Retrofit.Builder().baseUrl("https://open-api.xyz")
-            .build()
-            .create(OpenApiAuthService::class.java)
-
-    }
 
     @AuthScope
     @Provides
     fun provideOpenApiAuthService(retrofitBuilder: Retrofit.Builder): OpenApiAuthService {
-
-//        return Retrofit.Builder().baseUrl("https://open-api.xyz")
-//            .build()
-//            .create(OpenApiAuthService::class.java)
-
         return retrofitBuilder
             .build()
             .create(OpenApiAuthService::class.java)
