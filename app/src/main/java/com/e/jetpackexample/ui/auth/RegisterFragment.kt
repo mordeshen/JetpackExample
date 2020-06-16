@@ -2,14 +2,14 @@ package com.e.jetpackexample.ui.auth
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 
 import com.e.jetpackexample.R
-import com.e.jetpackexample.util.GenericApiResponse
+import com.e.jetpackexample.ui.auth.state.RegistrationFields
+import kotlinx.android.synthetic.main.fragment_register.*
 
 class RegisterFragment : BaseAuthFragment() {
 
@@ -25,20 +25,29 @@ class RegisterFragment : BaseAuthFragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG,"RegisterFragment: $viewModel")
 
-        viewModel.testRegister().observe(viewLifecycleOwner, Observer {response->
-            when(response){
-                is GenericApiResponse.ApiSuccessResponse -> {
-                    Log.d(TAG,"Register RESPONSE: ${response.body}")
-                }
-                is GenericApiResponse.ApiErrorResponse -> {
-                    Log.d(TAG,"Register RESPONSE: ${response.errorMessage}")
-                }
-                is GenericApiResponse.ApiEmptyResponse -> {
-                    Log.d(TAG,"Register RESPONSE: empty response")
-                }
-            }
+        subscribeObservers()
+    }
 
+    private fun subscribeObservers() {
+        viewModel.viewState.observe(viewLifecycleOwner, Observer {
+            it.registrationFields?.let {loginFields ->
+                loginFields.registration_email?.let { et_register_email.setText(it) }
+                loginFields.registration_username?.let { et_register_username.setText(it) }
+                loginFields.registration_password?.let { et_register_password.setText(it) }
+                loginFields.registration_confirm_password?.let { et_register_confirm_password.setText(it) }
+            }
         })
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.setRegistrationFields(
+            RegistrationFields(
+                et_register_email.text.toString(),
+                et_register_username.text.toString(),
+                et_register_password.text.toString(),
+                et_register_confirm_password.text.toString()
+            )
+        )
+    }
 }
