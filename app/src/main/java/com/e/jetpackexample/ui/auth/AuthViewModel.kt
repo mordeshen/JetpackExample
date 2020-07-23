@@ -1,9 +1,6 @@
 package com.e.jetpackexample.ui.auth
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import com.e.jetpackexample.api.auth.network_responses.LoginResponse
-import com.e.jetpackexample.api.auth.network_responses.RegistrationResponse
 import com.e.jetpackexample.models.AuthToken
 import com.e.jetpackexample.repostiory.auth.AuthRepository
 import com.e.jetpackexample.ui.BaseViewModel
@@ -13,9 +10,7 @@ import com.e.jetpackexample.ui.auth.state.AuthViewState
 import com.e.jetpackexample.ui.auth.state.LoginFields
 import com.e.jetpackexample.ui.auth.state.RegistrationFields
 import com.e.jetpackexample.util.AbsentLiveData
-import com.e.jetpackexample.util.GenericApiResponse
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class AuthViewModel
 @Inject
@@ -26,11 +21,19 @@ constructor(
     override fun handleStateEvent(stateEvent: AuthStateEvent): LiveData<DataState<AuthViewState>> {
         when(stateEvent){
             is AuthStateEvent.LoginAttemptEvent -> {
-                return AbsentLiveData.create()
+                return authRepository.attemptLogin(
+                    stateEvent.email,
+                    stateEvent.password
+                )
             }
 
             is AuthStateEvent.RegisterAttemptEvent -> {
-                return AbsentLiveData.create()
+                return authRepository.attemptRegistration(
+                    stateEvent.email,
+                    stateEvent.username,
+                    stateEvent.password,
+                    stateEvent.confirm_password
+                )
             }
 
             is AuthStateEvent.CheckPreviousAuthEvent -> {

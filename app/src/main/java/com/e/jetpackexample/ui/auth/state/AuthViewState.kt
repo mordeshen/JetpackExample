@@ -14,17 +14,17 @@ data class RegistrationFields(
     var registration_password : String? = null,
     var registration_confirm_password : String? = null
 ){
-     class RegistrationErrors(){
-         companion object{
-             fun mustFillAllFields(): String{
+     class RegistrationErrors {
+         companion object {
+             fun mustFillAllFields(): String {
                  return "All fields are required"
              }
 
-             fun passwordDoNotMatch() :String {
+             fun passwordDoNotMatch(): String {
                  return "Password must match"
              }
 
-             fun none(): String{
+             fun none(): String {
                  return "None"
              }
 
@@ -32,14 +32,16 @@ data class RegistrationFields(
          }
      }
 
-    fun isValid():String{
+    fun isValidForRegistration(): String {
         if (registration_email.isNullOrEmpty()
-            ||registration_email.isNullOrEmpty()
-            ||registration_password.isNullOrEmpty()
-            ||registration_confirm_password.isNullOrEmpty()
-        ){ return RegistrationErrors.mustFillAllFields() }
+            || registration_email.isNullOrEmpty()
+            || registration_password.isNullOrEmpty()
+            || registration_confirm_password.isNullOrEmpty()
+        ) {
+            return RegistrationErrors.mustFillAllFields()
+        }
 
-        if (!registration_password.equals(registration_confirm_password)){
+        if (!registration_password.equals(registration_confirm_password)) {
             return RegistrationErrors.passwordDoNotMatch()
         }
 

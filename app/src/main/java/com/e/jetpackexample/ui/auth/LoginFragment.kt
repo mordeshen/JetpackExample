@@ -2,16 +2,13 @@ package com.e.jetpackexample.ui.auth
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-
 import com.e.jetpackexample.R
+import com.e.jetpackexample.ui.auth.state.AuthStateEvent.LoginAttemptEvent
 import com.e.jetpackexample.ui.auth.state.LoginFields
-import com.e.jetpackexample.util.GenericApiResponse
-import com.e.jetpackexample.util.GenericApiResponse.*
 import kotlinx.android.synthetic.main.fragment_login.*
 
 class LoginFragment : BaseAuthFragment() {
@@ -30,15 +27,27 @@ class LoginFragment : BaseAuthFragment() {
 
         subscribeObservers()
 
+        login_button.setOnClickListener {
+            login()
+        }
     }
 
     private fun subscribeObservers() {
         viewModel.viewState.observe(viewLifecycleOwner, Observer {
-            it.loginFields?.let {loginFields ->
-                loginFields.login_email?.let { et_login_mail.setText(it) }
-                loginFields.login_password?.let { et_login_password.setText(it) }
+            it.loginFields?.let { loginFields ->
+                loginFields.login_email?.let { input_email.setText(it) }
+                loginFields.login_password?.let { input_password.setText(it) }
             }
         })
+    }
+
+    fun login() {
+        viewModel.setStateEvent(
+            LoginAttemptEvent(
+                input_email.text.toString(),
+                input_password.text.toString()
+            )
+        )
     }
 
     override fun onDestroyView() {
@@ -47,8 +56,8 @@ class LoginFragment : BaseAuthFragment() {
         //in order to save the fields in the registration fields
         viewModel.setLoginFields(
             LoginFields(
-                et_login_mail.text.toString(),
-                et_login_password.text.toString()
+                input_email.text.toString(),
+                input_password.text.toString()
             )
         )
     }
