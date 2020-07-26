@@ -10,16 +10,19 @@ import com.e.jetpackexample.ui.auth.state.AuthViewState
 import com.e.jetpackexample.ui.auth.state.LoginFields
 import com.e.jetpackexample.ui.auth.state.RegistrationFields
 import com.e.jetpackexample.util.AbsentLiveData
+import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
 class AuthViewModel
 @Inject
 constructor(
     val authRepository: AuthRepository
-): BaseViewModel<AuthStateEvent,AuthViewState>(){
+): BaseViewModel<AuthStateEvent,AuthViewState>() {
     // every viewModel can be kind of the same, handle the stateEvent, and set the situations
+
+    @OptIn(InternalCoroutinesApi::class)
     override fun handleStateEvent(stateEvent: AuthStateEvent): LiveData<DataState<AuthViewState>> {
-        when(stateEvent){
+        when (stateEvent) {
             is AuthStateEvent.LoginAttemptEvent -> {
                 return authRepository.attemptLogin(
                     stateEvent.email,
@@ -64,13 +67,22 @@ constructor(
         _viewState.value = update
     }
 
-    fun setAuthToken(authToken:AuthToken){
+    fun setAuthToken(authToken: AuthToken) {
         val update = getCurrentViewStateOrNew()
-        if (update.authToken == authToken){
+        if (update.authToken == authToken) {
             return
         }
         update.authToken = authToken
         _viewState.value = update
     }
 
+    fun cancelActiveJobs() {
+        authRepository.cancelActiveJobs()
+    }
+
+    //if vm cleared
+    override fun onCleared() {
+        super.onCleared()
+        cancelActiveJobs()
+    }
 }

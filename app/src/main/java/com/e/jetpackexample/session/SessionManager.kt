@@ -3,8 +3,6 @@ package com.e.jetpackexample.session
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -71,38 +69,11 @@ constructor(
 
     fun isConnectedToInternet(): Boolean {
         val cm = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        cm.let {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val capabilities = cm.getNetworkCapabilities(cm.activeNetwork)
-                capabilities?.let {
-                    when {
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                            return true
-                        }
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                            return true
-                        }
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                            return true
-                        }
-                        else -> return true
-                    }
-                }
-            } else {
-
-                try {
-                    var activeNetworkInfo = cm.activeNetworkInfo
-                    if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
-                        Log.i("update_statut", "Network is available : true")
-                        return true
-                    } else {
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "isConnectedToInternet: ${e.message}")
-                }
-            }
+        try {
+            return cm.activeNetworkInfo.isConnected
+        } catch (e: Exception) {
+            Log.e(TAG, "isConnectedToTheInternet: ${e.message}")
         }
-        Log.i("update_statut", "Network is available : FALSE ")
         return false
     }
 }

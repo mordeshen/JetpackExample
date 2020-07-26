@@ -24,4 +24,22 @@ data class AccountProperties(
     @ColumnInfo(name = "username")
     var username: String
 
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AccountProperties) return false
+
+        if (pk != other.pk) return false
+        if (email != other.email) return false
+        if (username != other.username) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = pk
+        result = 31 * result + email.hashCode()
+        result = 31 * result + username.hashCode()
+        return result
+    }
+}

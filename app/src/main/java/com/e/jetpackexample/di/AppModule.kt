@@ -1,8 +1,6 @@
 package com.e.jetpackexample.di
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
@@ -14,7 +12,6 @@ import com.e.jetpackexample.persistance.AppDatabase.Companion.DATABASE_NAME
 import com.e.jetpackexample.persistance.AuthTokenDao
 import com.e.jetpackexample.util.Constants
 import com.e.jetpackexample.util.LiveDataCallAdapterFactory
-import com.e.jetpackexample.util.PreferenceKeys
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -26,17 +23,17 @@ import javax.inject.Singleton
 @Module
 class AppModule{
 
-    @Singleton
-    @Provides
-    fun provideSharedPreferences(application: Application): SharedPreferences {
-        return application.getSharedPreferences(PreferenceKeys.APP_PREFERENCES, Context.MODE_PRIVATE)
-    }
-
-    @Singleton
-    @Provides
-    fun provideSharedPrefsEditor(sharedPreferences: SharedPreferences): SharedPreferences.Editor {
-        return sharedPreferences.edit()
-    }
+//    @Singleton
+//    @Provides
+//    fun provideSharedPreferences(application: Application): SharedPreferences {
+//        return application.getSharedPreferences(PreferenceKeys.APP_PREFERENCES, Context.MODE_PRIVATE)
+//    }
+//
+//    @Singleton
+//    @Provides
+//    fun provideSharedPrefsEditor(sharedPreferences: SharedPreferences): SharedPreferences.Editor {
+//        return sharedPreferences.edit()
+//    }
 
     @Singleton
     @Provides
@@ -46,7 +43,7 @@ class AppModule{
 
     @Singleton
     @Provides
-    fun provideRetrofitBuilder(gson:  Gson): Retrofit.Builder{
+    fun provideRetrofitBuilder(gson: Gson): Retrofit.Builder {
         return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addCallAdapterFactory(LiveDataCallAdapterFactory())

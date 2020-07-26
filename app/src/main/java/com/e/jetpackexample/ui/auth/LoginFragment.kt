@@ -23,7 +23,7 @@ class LoginFragment : BaseAuthFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "LoginFragment $viewModel")
+        Log.d(TAG, "LoginFragment: ${viewModel}")
 
         subscribeObservers()
 
@@ -32,11 +32,11 @@ class LoginFragment : BaseAuthFragment() {
         }
     }
 
-    private fun subscribeObservers() {
+    fun subscribeObservers() {
         viewModel.viewState.observe(viewLifecycleOwner, Observer {
-            it.loginFields?.let { loginFields ->
-                loginFields.login_email?.let { input_email.setText(it) }
-                loginFields.login_password?.let { input_password.setText(it) }
+            it.loginFields?.let {
+                it.login_email?.let { input_email.setText(it) }
+                it.login_password?.let { input_password.setText(it) }
             }
         })
     }
@@ -52,8 +52,6 @@ class LoginFragment : BaseAuthFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-
-        //in order to save the fields in the registration fields
         viewModel.setLoginFields(
             LoginFields(
                 input_email.text.toString(),
@@ -61,4 +59,5 @@ class LoginFragment : BaseAuthFragment() {
             )
         )
     }
+
 }

@@ -13,7 +13,9 @@ data class DataState<T>(
             return DataState(
                 error = Event(
                     StateError(response)
-                )
+                ),
+                loading = Loading(false),
+                data = null
             )
         }
 
@@ -22,6 +24,7 @@ data class DataState<T>(
             cachedData: T? = null
         ): DataState<T>{
             return DataState(
+                error = null,
                 loading = Loading(isLoading),
                 data = Data(
                     Event.dataEvent(
@@ -37,6 +40,8 @@ data class DataState<T>(
             response: Response? = null
         ):DataState<T>{
             return DataState(
+                error = null,
+                loading = Loading(false),
                 data = Data(
                     Event.dataEvent(data),
                     Event.responseEvent(response)

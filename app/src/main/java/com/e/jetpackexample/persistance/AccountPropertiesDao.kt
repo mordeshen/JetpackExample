@@ -1,6 +1,5 @@
 package com.e.jetpackexample.persistance
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -18,7 +17,7 @@ interface AccountPropertiesDao {
     fun insertAndIgnore(accountProperties: AccountProperties):Long
 
     @Query("SELECT * FROM account_properties WHERE pk = :pk")
-    fun searchByPk(pk:Int):AccountProperties?
+    fun searchByPk(pk: Int): AccountProperties
 
     @Query("SELECT * FROM account_properties WHERE email = :email")
     suspend fun searchByEmail(email:Int):AccountProperties?

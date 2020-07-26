@@ -22,19 +22,19 @@ abstract class BaseViewModel<StateEvent, ViewState>: ViewModel(){
 
         }
 
-    abstract fun handleStateEvent(stateEvent: StateEvent):LiveData<DataState<ViewState>>
-
     fun setStateEvent(event: StateEvent){
         _stateEvent.value = event
     }
 
-    fun getCurrentViewStateOrNew():ViewState{
+    fun getCurrentViewStateOrNew(): ViewState {
         val value = viewState.value?.let {
             it
-        }?: initNewViewState()
+        } ?: initNewViewState()
         return value
     }
 
-   abstract fun initNewViewState(): ViewState
+    abstract fun handleStateEvent(stateEvent: StateEvent): LiveData<DataState<ViewState>>
+
+    abstract fun initNewViewState(): ViewState
 
 }

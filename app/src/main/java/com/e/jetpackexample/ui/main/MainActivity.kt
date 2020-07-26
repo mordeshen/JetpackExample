@@ -3,14 +3,17 @@ package com.e.jetpackexample.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.Observer
-import com.e.jetpackexample.BaseActivity
 import com.e.jetpackexample.R
+import com.e.jetpackexample.ui.BaseActivity
 import com.e.jetpackexample.ui.auth.AuthActivity
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity() {
 
     private val TAG = "MainActivity"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,5 +37,14 @@ class MainActivity : BaseActivity() {
         val intent = Intent(this, AuthActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    override fun displayProgressBar(boolean: Boolean) {
+        if (boolean) {
+            progress_bar.visibility = View.VISIBLE
+        } else {
+            progress_bar.visibility = View.INVISIBLE
+
+        }
     }
 }

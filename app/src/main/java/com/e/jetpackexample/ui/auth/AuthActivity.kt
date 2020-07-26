@@ -3,21 +3,36 @@ package com.e.jetpackexample.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.e.jetpackexample.BaseActivity
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import com.e.jetpackexample.R
-import com.e.jetpackexample.ui.ResponseType
+import com.e.jetpackexample.ui.BaseActivity
 import com.e.jetpackexample.ui.main.MainActivity
 import com.e.jetpackexample.viewmodels.ViewModelProviderFactory
+import kotlinx.android.synthetic.main.activity_auth.*
 import javax.inject.Inject
 
-class AuthActivity : BaseActivity() {
-
+class AuthActivity : BaseActivity(),
+    NavController.OnDestinationChangedListener {
     private val TAG = "AuthActivity"
+
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        viewModel.cancelActiveJobs()
+    }
+
 
     @Inject
     lateinit var providerFactory: ViewModelProviderFactory
+
     lateinit var viewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,49 +40,36 @@ class AuthActivity : BaseActivity() {
         setContentView(R.layout.activity_auth)
 
         viewModel = ViewModelProvider(this, providerFactory).get(AuthViewModel::class.java)
+        findNavController(R.id.auth_nav_host_fragment).addOnDestinationChangedListener(this)
+
         subscribeObservers()
     }
 
-    fun subscribeObservers() {
+    private fun subscribeObservers() {
+
         viewModel.dataState.observe(this, Observer { dataState ->
-            Log.d(TAG, "subscribeObservers: datastate1 ${dataState.data}")
+            onDataStateChange(dataState)
             dataState.data?.let { data ->
-                Log.d(TAG, "subscribeObservers: datastate2")
                 data.data?.let { event ->
-                    Log.d(TAG, "subscribeObservers: datastate3")
                     event.getContentIfNotHandled()?.let {
-                        Log.d(TAG, "subscribeObservers: event")
                         it.authToken?.let {
-                            Log.d(TAG, "subscribeObservers: dataState: ${it}")
+                            Log.d(TAG, "AuthActivity, DataState: ${it}")
                             viewModel.setAuthToken(it)
                         }
                     }
                 }
-                data.response?.let { event ->
-                    event.getContentIfNotHandled()?.let {
-                        when (it.responseType) {
-                            is ResponseType.Dialog -> {
-                                //inflate error dialog
-                            }
-                            is ResponseType.Toast -> {
-                                //show toast
-                            }
-                            is ResponseType.None -> {
-                                Log.e(TAG, "subscribeObservers: response: ${it.message}")
-                            }
-                        }
-                    }
-                }
             }
         })
 
-        viewModel.viewState.observe(this, Observer { it ->
-            it.authToken?.let { authToken ->
-                sessionManager.login(authToken)
+        viewModel.viewState.observe(this, Observer {
+            Log.d(TAG, "AuthActivity, subscribeObservers: AuthViewState: ${it}")
+            it.authToken?.let {
+                sessionManager.login(it)
             }
         })
+
         sessionManager.cachedToken.observe(this, Observer { dataState ->
-            Log.d(TAG, "subscribeObservers: authToken ${dataState} ")
+            Log.d(TAG, "AuthActivity, subscribeObservers: AuthDataState: ${dataState}")
             dataState.let { authToken ->
                 if (authToken != null && authToken.account_pk != -1 && authToken.token != null) {
                     navMainActivity()
@@ -76,10 +78,20 @@ class AuthActivity : BaseActivity() {
         })
     }
 
-    private fun navMainActivity() {
+    fun navMainActivity() {
+        Log.d(TAG, "navMainActivity: called.")
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
     }
 
+    override fun displayProgressBar(boolean: Boolean) {
+        if (boolean) {
+            progress_bar.visibility = View.VISIBLE
+        } else {
+            progress_bar.visibility = View.INVISIBLE
+
+        }
+    }
 }
+
