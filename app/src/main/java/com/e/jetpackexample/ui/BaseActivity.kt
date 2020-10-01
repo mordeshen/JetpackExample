@@ -1,6 +1,8 @@
 package com.e.jetpackexample.ui
 
+import android.content.Context
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import com.e.jetpackexample.session.SessionManager
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.coroutines.Dispatchers.Main
@@ -42,7 +44,7 @@ abstract class BaseActivity : DaggerAppCompatActivity(), DataStateChangeListener
                 }
                 is ResponseType.Dialog -> {
                     it.message?.let { message ->
-                        displaySuccesDialog(message)
+                        displaySuccessDialog(message)
                     }
                 }
                 is ResponseType.None -> {
@@ -69,6 +71,15 @@ abstract class BaseActivity : DaggerAppCompatActivity(), DataStateChangeListener
                     Log.e(TAG, "handleStateError: ${it.response.message}")
                 }
             }
+        }
+    }
+
+    override fun hideSoftKeyboard() {
+        if (currentFocus != null) {
+            val inputMethodManager = getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
         }
     }
 

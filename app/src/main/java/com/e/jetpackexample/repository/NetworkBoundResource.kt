@@ -1,4 +1,4 @@
-package com.e.jetpackexample.repostiory
+package com.e.jetpackexample.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -19,10 +19,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 
-@InternalCoroutinesApi
-abstract class NetworkBoundResource<ResponseObject, ViewStateType>
+abstract class NetworkBoundResource<ResponseObject, CacheObject, ViewStateType>
     (
-    isNetworkAvailable: Boolean // is there a network connection
+    isNetworkAvailable: Boolean,// is there a network connection
+    isNetworkRequest: Boolean, //is this a network request
+    shouldCancelIfNotInternet: Boolean, //should this job be cancelled
+    shouldLoadFromCache: Boolean//should the cached data be loaded
 ) {
     private val TAG = "NetworkBoundResource"
 
@@ -34,36 +36,63 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>
         setJob(initNewJob())
         setValue(DataState.loading(isLoading = true, cachedData = null))
 
-        if (isNetworkAvailable) {
-            coroutineScope.launch {
-                delay(TESTING_NETWORK_DELAY)
-                withContext(Main) {
-                    val apiResponse = createCall()
-                    result.addSource(apiResponse) { response ->
-                        result.removeSource(apiResponse)
-
-                        coroutineScope.launch {
-                            handleNetworkCall(response)
-                        }
-
-
-                    }
-                }
-
+        if (shouldLoadFromCache) {
+            val dbSource = loadFromCache()
+            result.addSource(dbSource) {
+                result.removeSource(dbSource)
+                setValue(DataState.loading(isLoading = true, cachedData = it))
             }
-            GlobalScope.launch(IO) {
-                delay(NETWORK_TIMEOUT)
-                if (!job.complete()) {
-                    Log.e(TAG, "NetworkBoundResource: JOB NETWORK TIMEOUT.")
-                    job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
+        }
+
+        if (isNetworkRequest) {
+            if (isNetworkAvailable) {
+                doNetworkRequest()
+            } else {
+                if (shouldCancelIfNotInternet) {
+                    onErrorReturn(
+                        UNABLE_TODO_OPERATION_WO_INTERNET,
+                        shouldUseDialog = true,
+                        shouldUseToast = false
+                    )
+                } else {
+                    doCacheRequest()
                 }
             }
         } else {
-            onErrorReturn(
-                UNABLE_TODO_OPERATION_WO_INTERNET,
-                shouldUseDialog = true,
-                shouldUseToast = false
-            )
+            doCacheRequest()
+        }
+    }
+
+    private fun doCacheRequest() {
+        coroutineScope.launch {
+            delay(TESTING_NETWORK_DELAY)
+            createCacheRequestAndReturn()
+        }
+    }
+
+    private fun doNetworkRequest() {
+        coroutineScope.launch {
+            delay(TESTING_NETWORK_DELAY)
+            withContext(Main) {
+                val apiResponse = createCall()
+                result.addSource(apiResponse) { response ->
+                    result.removeSource(apiResponse)
+
+                    coroutineScope.launch {
+                        handleNetworkCall(response)
+                    }
+
+
+                }
+            }
+
+        }
+        GlobalScope.launch(IO) {
+            delay(NETWORK_TIMEOUT)
+            if (!job.complete()) {
+                Log.e(TAG, "NetworkBoundResource: JOB NETWORK TIMEOUT.")
+                job.cancel(CancellationException(UNABLE_TO_RESOLVE_HOST))
+            }
         }
     }
 
@@ -122,7 +151,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>
         )
     }
 
-    @InternalCoroutinesApi
+    @OptIn(InternalCoroutinesApi::class)
     private fun initNewJob(): Job {
         Log.d(TAG, "initNewJob: called")
         job = Job()
@@ -151,4 +180,7 @@ abstract class NetworkBoundResource<ResponseObject, ViewStateType>
     abstract suspend fun handleApiSuccessResponse(response: ApiSuccessResponse<ResponseObject>)
     abstract fun createCall(): LiveData<GenericApiResponse<ResponseObject>>
     abstract fun setJob(job: Job)
+    abstract fun loadFromCache(): LiveData<ViewStateType>
+    abstract suspend fun updateLocalDb(cacheObject: CacheObject?)
+    abstract suspend fun createCacheRequestAndReturn()
 }

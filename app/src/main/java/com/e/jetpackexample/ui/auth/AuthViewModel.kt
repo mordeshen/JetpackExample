@@ -2,15 +2,14 @@ package com.e.jetpackexample.ui.auth
 
 import androidx.lifecycle.LiveData
 import com.e.jetpackexample.models.AuthToken
-import com.e.jetpackexample.repostiory.auth.AuthRepository
+import com.e.jetpackexample.repository.auth.AuthRepository
 import com.e.jetpackexample.ui.BaseViewModel
 import com.e.jetpackexample.ui.DataState
 import com.e.jetpackexample.ui.auth.state.AuthStateEvent
+import com.e.jetpackexample.ui.auth.state.AuthStateEvent.*
 import com.e.jetpackexample.ui.auth.state.AuthViewState
 import com.e.jetpackexample.ui.auth.state.LoginFields
 import com.e.jetpackexample.ui.auth.state.RegistrationFields
-import com.e.jetpackexample.util.AbsentLiveData
-import kotlinx.coroutines.InternalCoroutinesApi
 import javax.inject.Inject
 
 class AuthViewModel
@@ -20,17 +19,16 @@ constructor(
 ): BaseViewModel<AuthStateEvent,AuthViewState>() {
     // every viewModel can be kind of the same, handle the stateEvent, and set the situations
 
-    @OptIn(InternalCoroutinesApi::class)
     override fun handleStateEvent(stateEvent: AuthStateEvent): LiveData<DataState<AuthViewState>> {
         when (stateEvent) {
-            is AuthStateEvent.LoginAttemptEvent -> {
+            is LoginAttemptEvent -> {
                 return authRepository.attemptLogin(
                     stateEvent.email,
                     stateEvent.password
                 )
             }
 
-            is AuthStateEvent.RegisterAttemptEvent -> {
+            is RegisterAttemptEvent -> {
                 return authRepository.attemptRegistration(
                     stateEvent.email,
                     stateEvent.username,
@@ -39,8 +37,17 @@ constructor(
                 )
             }
 
-            is AuthStateEvent.CheckPreviousAuthEvent -> {
-                return AbsentLiveData.create()
+            is CheckPreviousAuthEvent -> {
+                return authRepository.checkPreviousAuthUser()
+            }
+
+            is None -> {
+                return object : LiveData<DataState<AuthViewState>>() {
+                    override fun onActive() {
+                        super.onActive()
+                        value = DataState.data(null, null)
+                    }
+                }
             }
         }
     }
@@ -77,6 +84,7 @@ constructor(
     }
 
     fun cancelActiveJobs() {
+        handlePendingData()
         authRepository.cancelActiveJobs()
     }
 
@@ -84,5 +92,9 @@ constructor(
     override fun onCleared() {
         super.onCleared()
         cancelActiveJobs()
+    }
+
+    fun handlePendingData() {
+        setStateEvent(None())
     }
 }

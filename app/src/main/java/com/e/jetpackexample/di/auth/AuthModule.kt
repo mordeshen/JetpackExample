@@ -1,9 +1,10 @@
 package com.e.jetpackexample.di.auth
 
+import android.content.SharedPreferences
 import com.e.jetpackexample.api.auth.OpenApiAuthService
 import com.e.jetpackexample.persistance.AccountPropertiesDao
 import com.e.jetpackexample.persistance.AuthTokenDao
-import com.e.jetpackexample.repostiory.auth.AuthRepository
+import com.e.jetpackexample.repository.auth.AuthRepository
 import com.e.jetpackexample.session.SessionManager
 import dagger.Module
 import dagger.Provides
@@ -28,13 +29,17 @@ class AuthModule{
         sessionManager: SessionManager,
         authTokenDao: AuthTokenDao,
         accountPropertiesDao: AccountPropertiesDao,
-        openApiAuthService: OpenApiAuthService
+        openApiAuthService: OpenApiAuthService,
+        sharedPreferences: SharedPreferences,
+        editor: SharedPreferences.Editor
     ):AuthRepository{
         return AuthRepository(
             authTokenDao,
             accountPropertiesDao,
             openApiAuthService,
-            sessionManager
+            sessionManager,
+            sharedPreferences,
+            editor
         )
     }
 }

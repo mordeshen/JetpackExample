@@ -33,15 +33,15 @@ class LoginFragment : BaseAuthFragment() {
     }
 
     fun subscribeObservers() {
-        viewModel.viewState.observe(viewLifecycleOwner, Observer {
-            it.loginFields?.let {
-                it.login_email?.let { input_email.setText(it) }
-                it.login_password?.let { input_password.setText(it) }
+        viewModel.viewState.observe(viewLifecycleOwner, Observer { viewState ->
+            viewState.loginFields?.let { loginFields ->
+                loginFields.login_email?.let { input_email.setText(it) }
+                loginFields.login_password?.let { input_password.setText(it) }
             }
         })
     }
 
-    fun login() {
+    private fun login() {
         viewModel.setStateEvent(
             LoginAttemptEvent(
                 input_email.text.toString(),
